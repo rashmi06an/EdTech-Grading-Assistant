@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Automated EdTech Grading Assistant - Slide Deck</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-color: #0b0f19;
+            --slide-bg: rgba(17, 24, 39, 0.75);
+            --slide-border: rgba(255, 255, 255, 0.08);
+            --primary: #6366f1;
+            --secondary: #a855f7;
+            --accent: #10b981;
+            --text-main: #f3f4f6;
+            --text-muted: #9ca3af;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            background-image: 
+                radial-gradient(circle at 15% 15%, rgba(99, 102, 241, 0.18) 0%, transparent 40%),
+                radial-gradient(circle at 85% 85%, rgba(168, 85, 247, 0.18) 0%, transparent 40%);
+        }
+
+        /* Slide Container */
+        .slider-wrapper {
+            position: relative;
+            width: 90%;
+            max-width: 900px;
+            height: 80vh;
+            max-height: 560px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .slide {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: var(--slide-bg);
+            border: 1px solid var(--slide-border);
+            border-radius: 28px;
+            padding: 3rem;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+            opacity: 0;
+            transform: translateX(100px) scale(0.95);
+            pointer-events: none;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .slide.active {
+            opacity: 1;
+            transform: translateX(0) scale(1);
+            pointer-events: auto;
+        }
+
+        .slide.prev {
+            opacity: 0;
+            transform: translateX(-100px) scale(0.95);
+        }
+
+        /* Typography & Layout */
+        .slide-header {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            padding-bottom: 1rem;
+            margin-bottom: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .slide-number {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 0.9rem;
+            color: var(--primary);
+            font-weight: 700;
+            background: rgba(99, 102, 241, 0.1);
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            border: 1px solid rgba(99, 102, 241, 0.2);
+        }
+
+        .slide-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 2.25rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #a5b4fc 0%, #c084fc 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .slide-content {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            font-size: 1.15rem;
+            line-height: 1.6;
+            color: #e5e7eb;
+        }
+
+        .slide-content ul {
+            list-style: none;
+            margin-left: 0;
+        }
+
+        .slide-content li {
+            position: relative;
+            padding-left: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .slide-content li::before {
+            content: '✦';
+            position: absolute;
+            left: 0;
+            color: var(--primary);
+        }
+
+        .slide-content strong {
+            color: #ffffff;
+            font-weight: 600;
+        }
+
+        .slide-footer {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            padding-top: 1rem;
+            margin-top: 1rem;
+            text-align: right;
+        }
+
+        /* Controls */
+        .controls-container {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .control-btn {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: var(--text-main);
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.25rem;
+            transition: all 0.2s;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+
+        .control-btn:hover {
+            background: var(--primary);
+            border-color: var(--primary);
+            transform: scale(1.08);
+            box-shadow: 0 6px 20px var(--primary-glow);
+        }
+
+        .control-btn:active {
+            transform: scale(0.98);
+        }
+
+        .slide-dots {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .dot.active {
+            background: var(--primary);
+            width: 24px;
+            border-radius: 4px;
+        }
+
+        /* Table Styling */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+            font-size: 0.95rem;
+        }
+
+        th, td {
+            padding: 0.75rem 1rem;
+            text-align: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        th {
+            background: rgba(99, 102, 241, 0.1);
+            color: #ffffff;
+            font-weight: 600;
+        }
+
+        tr:hover {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .highlight-cell {
+            color: var(--accent);
+            font-weight: 700;
+        }
+
+        .keyboard-hint {
+            position: absolute;
+            bottom: 1.5rem;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            background: rgba(255, 255, 255, 0.02);
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="slider-wrapper">
+        
+        <!-- Slide 1 -->
+        <div class="slide active">
+            <div class="slide-header">
+                <h2 class="slide-title">EdTech Grading Assistant</h2>
+                <span class="slide-number">Slide 1 of 10</span>
+            </div>
+            <div class="slide-content">
+                <h3 style="font-size: 1.8rem; margin-bottom: 1.5rem; font-family: 'Space Grotesk';">Automated Digit Image Classification using Optimized Support Vector Machines</h3>
+                <p style="margin-bottom: 1rem;"><strong>Industry Context:</strong> Educational platforms ingest millions of handwritten math worksheets daily. Automating grading cuts operational delays and scaling bottlenecks.</p>
+                <p><strong>Project Outcome:</strong> Created a highly robust pipeline that reaches a <strong>97.38% test classification accuracy</strong>, outperforming human-defined grading error rates.</p>
+            </div>
+            <div class="slide-footer">
+                Developed by Rashmi Anand | Automated EdTech Grading Assistant
+            </div>
+        </div>
+
+        <!-- Slide 2 -->
+        <div class="slide">
+            <div class="slide-header">
+                <h2 class="slide-title">The Challenge: Manual Grading</h2>
+                <span class="slide-number">Slide 2 of 10</span>
+            </div>
+            <div class="slide-content">
+                <ul>
+                    <li><strong>Grading Latency:</strong> Manual grading generates a 24 to 48-hour lag between worksheet submission and educational feedback.</li>
+                    <li><strong>Grade Inconsistency:</strong> Human graders suffer fatigue, leading to grade variations on identical handwriting stroke shapes.</li>
+                    <li><strong>Operational Bottleneck:</strong> Paper worksheets cannot scale in modern Online Learning Environments (OLEs) without automated ingestion.</li>
+                    <li><strong>Resolution:</strong> A localized classical machine learning model classifying digits in 1.4 milliseconds with 97%+ accuracy.</li>
+                </ul>
+            </div>
+            <div class="slide-footer">
+                Developed by Rashmi Anand | Automated EdTech Grading Assistant
+            </div>
+        </div>
+
+        <!-- Slide 3 -->
+        <div class="slide">
+            <div class="slide-header">
+                <h2 class="slide-title">MNIST Handwritten Database</h2>
+                <span class="slide-number">Slide 3 of 10</span>
+            </div>
+            <div class="slide-content">
+                <ul>
+                    <li><strong>Standard Database:</strong> Standard MNIST containing 70,000 scanned grayscale digit images.</li>
+                    <li><strong>Grid Format:</strong> Each image is pre-aligned as a $28 \times 28$ grayscale pixel matrix.</li>
+                    <li><strong>Target Digits:</strong> Balanced 10-class dataset covering characters `0` through `9`.</li>
+                    <li><strong>Balanced Classes:</strong> Each category contains between 6,000 and 7,900 samples, avoiding bias in decision hyperplanes.</li>
+                </ul>
+            </div>
+            <div class="slide-footer">
+                Developed by Rashmi Anand | Automated EdTech Grading Assistant
+            </div>
+        </div>
+
+        <!-- Slide 4 -->
+        <div class="slide">
+            <div class="slide-header">
+                <h2 class="slide-title">Data Preprocessing & Scaling</h2>
+                <span class="slide-number">Slide 4 of 10</span>
+            </div>
+            <div class="slide-content">
+                <ul>
+                    <li><strong>Matrix Flattening:</strong> Reshaping 2D $28 \times 28$ matrix coordinates into a 1D flat vector of $784$ features.</li>
+                    <li><strong>Min-Max Range scaling:</strong> Dividing raw 8-bit integer pixel values $[0, 255]$ by $255.0$ to standard floats $[0.0, 1.0]$.</li>
+                    <li><strong>Optimization Benefit:</strong> Keeps distance math bounded, speeds up SVM training convergence, and removes scale saturation.</li>
+                    <li><strong>Data Splits:</strong> Stratified extraction of 20,000 samples for training and 5,000 for validation testing.</li>
+                </ul>
+            </div>
+            <div class="slide-footer">
+                Developed by Rashmi Anand | Automated EdTech Grading Assistant
+            </div>
+        </div>
+
+        <!-- Slide 5 -->
+        <div class="slide">
+            <div class="slide-header">
+                <h2 class="slide-title">Mathematical SVM RBF Kernel</h2>
+                <span class="slide-number">Slide 5 of 10</span>
+            </div>
+            <div class="slide-content">
+                <ul>
+                    <li><strong>Support Vector Machine (SVM):</strong> Identifies the maximum margin decision boundary to separate groups.</li>
+                    <li><strong>Non-Linear Mapping:</strong> Hand-drawn strokes overlap significantly in flat pixel space. Linear separators fail.</li>
+                    <li><strong>RBF Kernel Function:</strong> Computes Radial Basis Function mapping:
+                        <div style="font-family: monospace; background: rgba(0,0,0,0.3); padding: 0.5rem; border-radius: 8px; text-align: center; margin: 0.5rem 0;">K(x_i, x_j) = exp(-γ ||x_i - x_j||²)</div>
+                    </li>
+                    <li><strong>Kernel Trick:</strong> Projects features into infinite dimensions to find a clean separating hyperplane.</li>
+                </ul>
+            </div>
+            <div class="slide-footer">
+                Developed by Rashmi Anand | Automated EdTech Grading Assistant
+            </div>
+        </div>
+
+        <!-- Slide 6 -->
+        <div class="slide">
+            <div class="slide-header">
+                <h2 class="slide-title">Tuning hyperparameter Sweeps</h2>
+                <span class="slide-number">Slide 6 of 10</span>
+            </div>
+            <div class="slide-content">
+                <ul>
+                    <li><strong>Tuning Method:</strong> Stratified 3-fold cross validation (`GridSearchCV`) sweeping $C$ and $\gamma$.</li>
+                    <li><strong>Parameters Evaluated:</strong> $C \in [0.1, 1, 10]$ and $\gamma \in [0.001, 0.01, 0.1, \text{'scale'}]$.</li>
+                    <li><strong>Tuned Solution:</strong> **$C = 10$, $\gamma = \text{'scale'}$** yielding **94.98%** mean cross-validation accuracy.</li>
+                    <li><strong>Overfitting Check:</strong> Gamma value $\gamma=0.1$ collapsed performance (down to 22%) due to localized support vector influence.</li>
+                </ul>
+            </div>
+            <div class="slide-footer">
+                Developed by Rashmi Anand | Automated EdTech Grading Assistant
+            </div>
+        </div>
+
+        <!-- Slide 7 -->
+        <div class="slide">
+            <div class="slide-header">
+                <h2 class="slide-title">Model Benchmarks</h2>
+                <span class="slide-number">Slide 7 of 10</span>
+            </div>
+            <div class="slide-content">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Metric</th>
+                            <th>Linear SVM</th>
+                            <th>Optimized RBF SVM</th>
+                            <th>Random Forest</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Accuracy</strong></td>
+                            <td>92.10%</td>
+                            <td class="highlight-cell">97.38%</td>
+                            <td>95.82%</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Macro F1</strong></td>
+                            <td>91.97%</td>
+                            <td class="highlight-cell">97.35%</td>
+                            <td>95.78%</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Train Time</strong></td>
+                            <td>15.39s</td>
+                            <td>103.64s</td>
+                            <td class="highlight-cell">1.27s</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Pred Time (5k)</strong></td>
+                            <td>15.39s</td>
+                            <td>7.22s</td>
+                            <td class="highlight-cell">0.026s</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="slide-footer">
+                Developed by Rashmi Anand | Automated EdTech Grading Assistant
+            </div>
+        </div>
+
+        <!-- Slide 8 -->
+        <div class="slide">
+            <div class="slide-header">
+                <h2 class="slide-title">Error Analysis: Digit Confusions</h2>
+                <span class="slide-number">Slide 8 of 10</span>
+            </div>
+            <div class="slide-content">
+                <ul>
+                    <li><strong>Digit 4 vs. 9 Confusion:</strong> Most common misclassification. Slanted vertical strokes and loops mimic each other.</li>
+                    <li><strong>Digit 3 vs. 8 Confusion:</strong> Mathematical coordinate shapes are identical except for an open left loop.</li>
+                    <li><strong>Spatial Limitations:</strong> Flattening discards structural geometries (intersections, loops). Model relies on pixel overlap.</li>
+                    <li><strong>Recommendation:</strong> Use HOG descriptors or CNNs to resolve spatial invariance issues.</li>
+                </ul>
+            </div>
+            <div class="slide-footer">
+                Developed by Rashmi Anand | Automated EdTech Grading Assistant
+            </div>
+        </div>
+
+        <!-- Slide 9 -->
+        <div class="slide">
+            <div class="slide-header">
+                <h2 class="slide-title">Operational System Integration</h2>
+                <span class="slide-number">Slide 9 of 10</span>
+            </div>
+            <div class="slide-content">
+                <ul>
+                    <li><strong>CPU Compatibility:</strong> Runs efficiently on standard CPUs without GPU hosting overheads.</li>
+                    <li><strong>Grading Latency:</strong> 1.4 milliseconds per digit enables instant feedback on student tablet screens.</li>
+                    <li><strong>Inference Confidences:</strong> RBF SVM outputs prediction class probability profiles.</li>
+                    <li><strong>Integrity Gates:</strong> Low-confidence scores ($<75\%$) automatically trigger human grader manual audits.</li>
+                </ul>
+            </div>
+            <div class="slide-footer">
+                Developed by Rashmi Anand | Automated EdTech Grading Assistant
+            </div>
+        </div>
+
+        <!-- Slide 10 -->
+        <div class="slide">
+            <div class="slide-header">
+                <h2 class="slide-title">Conclusion & Future Work</h2>
+                <span class="slide-number">Slide 10 of 10</span>
+            </div>
+            <div class="slide-content">
+                <ul>
+                    <li><strong>Model Selection:</strong> Adopt RBF SVM ($C=10, \gamma=\text{'scale'}$) for grading since accuracy is paramount.</li>
+                    <li><strong>Normalization Standards:</strong> Custom `/255.0` is robust, stateless, and optimized for production.</li>
+                    <li><strong>Feature Upgrades:</strong> Transition to HOG or convolutional features to ignore rotation/slant errors.</li>
+                    <li><strong>Grading Assistance:</strong> Ready for live pilot test integration inside grading platforms.</li>
+                </ul>
+            </div>
+            <div class="slide-footer">
+                Developed by Rashmi Anand | Automated EdTech Grading Assistant
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Navigation Controls -->
+    <div class="controls-container">
+        <button class="control-btn" id="prev-btn">←</button>
+        <div class="slide-dots" id="dots-container"></div>
+        <button class="control-btn" id="next-btn">→</button>
+    </div>
+
+    <div class="keyboard-hint">
+        Use Left/Right arrow keys or click the dots to navigate slides
+    </div>
+
+    <script>
+        const slides = document.querySelectorAll('.slide');
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const dotsContainer = document.getElementById('dots-container');
+        
+        let currentSlide = 0;
+
+        // Generate Dots
+        slides.forEach((slide, idx) => {
+            const dot = document.createElement('div');
+            dot.classList.add('dot');
+            if (idx === 0) dot.classList.add('active');
+            dot.addEventListener('click', () => goToSlide(idx));
+            dotsContainer.appendChild(dot);
+        });
+
+        const dots = document.querySelectorAll('.dot');
+
+        function updateSlideClasses() {
+            slides.forEach((slide, idx) => {
+                slide.className = 'slide';
+                if (idx === currentSlide) {
+                    slide.classList.add('active');
+                } else if (idx < currentSlide) {
+                    slide.classList.add('prev');
+                }
+            });
+            
+            dots.forEach((dot, idx) => {
+                if (idx === currentSlide) {
+                    dot.classList.add('active');
+                } else {
+                    dot.classList.remove('active');
+                }
+            });
+        }
+
+        function goToSlide(idx) {
+            currentSlide = idx;
+            updateSlideClasses();
+        }
+
+        prevBtn.addEventListener('click', () => {
+            currentSlide = (currentSlide - 1 + slides.length) % slides.length;
+            updateSlideClasses();
+        });
+
+        nextBtn.addEventListener('click', () => {
+            currentSlide = (currentSlide + 1) % slides.length;
+            updateSlideClasses();
+        });
+
+        // Keyboard Navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ') {
+                currentSlide = (currentSlide + 1) % slides.length;
+                updateSlideClasses();
+            } else if (e.key === 'ArrowLeft') {
+                currentSlide = (currentSlide - 1 + slides.length) % slides.length;
+                updateSlideClasses();
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Automated EdTech Grading Assistant</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-color: #0b0f19;
+            --card-bg: rgba(17, 24, 39, 0.7);
+            --card-border: rgba(255, 255, 255, 0.08);
+            --primary: #6366f1;
+            --primary-glow: rgba(99, 102, 241, 0.4);
+            --secondary: #a855f7;
+            --accent: #10b981;
+            --text-main: #f3f4f6;
+            --text-muted: #9ca3af;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(99, 102, 241, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(168, 85, 247, 0.15) 0%, transparent 40%);
+        }
+
+        header {
+            padding: 2rem 1.5rem 1rem;
+            text-align: center;
+        }
+
+        h1 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 2.25rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #a5b4fc 0%, #c084fc 50%, #818cf8 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.02em;
+        }
+
+        .subtitle {
+            font-size: 1rem;
+            color: var(--text-muted);
+            font-weight: 400;
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.5;
+        }
+
+        main {
+            flex-grow: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 1.5rem;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: 1fr 1.2fr;
+            gap: 2.5rem;
+            width: 100%;
+            max-width: 960px;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 24px;
+            padding: 2.5rem;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+        }
+
+        .left-panel {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .canvas-container {
+            position: relative;
+            background-color: #000;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 0 0 1px var(--card-border), 0 8px 30px rgba(0, 0, 0, 0.6);
+            cursor: crosshair;
+        }
+
+        /* Ambient glow on drawing area */
+        .canvas-container::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            pointer-events: none;
+            border-radius: 16px;
+            box-shadow: inset 0 0 20px rgba(99, 102, 241, 0.2);
+            transition: opacity 0.3s;
+        }
+
+        #digit-canvas {
+            display: block;
+            background-color: #000000;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 1rem;
+            width: 100%;
+            max-width: 280px;
+        }
+
+        button {
+            flex: 1;
+            padding: 0.85rem 1.25rem;
+            border: none;
+            border-radius: 12px;
+            font-family: inherit;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        button.clear-btn {
+            background-color: rgba(255, 255, 255, 0.05);
+            color: var(--text-main);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        button.clear-btn:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        button.predict-btn {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: #ffffff;
+            box-shadow: 0 4px 14px var(--primary-glow);
+        }
+
+        button.predict-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.6);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .right-panel {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            gap: 1.5rem;
+        }
+
+        .result-box {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            border-radius: 16px;
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .prediction-glowing-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .predicted-digit {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 5.5rem;
+            font-weight: 700;
+            line-height: 1;
+            color: #ffffff;
+            text-shadow: 0 0 25px rgba(99, 102, 241, 0.6), 0 0 50px rgba(168, 85, 247, 0.3);
+            margin: 0.25rem 0;
+            width: 90px;
+            height: 90px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 20px;
+        }
+
+        .prediction-label {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .result-details {
+            flex-grow: 1;
+        }
+
+        .result-details h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .result-details p {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            line-height: 1.4;
+        }
+
+        .confidence-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.6rem;
+        }
+
+        .confidence-row {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 0.85rem;
+        }
+
+        .digit-label {
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 700;
+            width: 15px;
+            color: var(--text-muted);
+        }
+
+        .digit-label.active {
+            color: #ffffff;
+        }
+
+        .progress-bar-container {
+            flex-grow: 1;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--primary) 0%, var(--secondary) 100%);
+            border-radius: 4px;
+            transition: width 0.4s cubic-bezier(0.1, 0.8, 0.3, 1.0);
+        }
+
+        .confidence-val {
+            width: 45px;
+            text-align: right;
+            font-variant-numeric: tabular-nums;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .confidence-val.active {
+            color: var(--accent);
+            font-weight: 700;
+        }
+
+        footer {
+            padding: 1.5rem;
+            text-align: center;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            border-top: 1px solid rgba(255, 255, 255, 0.03);
+        }
+
+        /* Tips section */
+        .drawing-tips {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            background: rgba(99, 102, 241, 0.04);
+            border: 1px solid rgba(99, 102, 241, 0.1);
+            border-radius: 12px;
+            padding: 0.75rem 1rem;
+            width: 100%;
+            max-width: 280px;
+            text-align: center;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+                padding: 1.5rem;
+            }
+            h1 {
+                font-size: 1.75rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Automated EdTech Grading Assistant</h1>
+        <p class="subtitle">Handwritten digit classification demo running an optimized Support Vector Machine (SVM) model. Draw a digit inside the box below to test grading inference.</p>
+    </header>
+
+    <main>
+        <div class="container">
+            <div class="left-panel">
+                <div class="canvas-container" id="canvas-wrapper">
+                    <!-- Standard MNIST dimensions scaled up 10x for rendering: 280x280 -->
+                    <canvas id="digit-canvas" width="280" height="280"></canvas>
+                </div>
+                
+                <div class="button-group">
+                    <button class="clear-btn" id="clear-button">Clear</button>
+                    <button class="predict-btn" id="predict-button">Grade</button>
+                </div>
+                
+                <div class="drawing-tips">
+                    💡 <strong>Tip:</strong> Draw a single digit large and centered in the box for the highest accuracy.
+                </div>
+            </div>
+
+            <div class="right-panel">
+                <div class="result-box">
+                    <div class="prediction-glowing-wrapper">
+                        <span class="prediction-label">Prediction</span>
+                        <div class="predicted-digit" id="predicted-value">-</div>
+                    </div>
+                    <div class="result-details">
+                        <h3 id="result-title">Awaiting Drawing...</h3>
+                        <p id="result-desc">Draw a number 0 to 9 on the left and click 'Grade'. The SVM RBF model will output the most likely classification in real time.</p>
+                    </div>
+                </div>
+
+                <div class="confidence-list">
+                    <!-- Repeat for digits 0-9 -->
+                    <div class="confidence-row" data-digit="0">
+                        <span class="digit-label">0</span>
+                        <div class="progress-bar-container">
+                            <div class="progress-bar" id="bar-0"></div>
+                        </div>
+                        <span class="confidence-val" id="val-0">0.0%</span>
+                    </div>
+                    <div class="confidence-row" data-digit="1">
+                        <span class="digit-label">1</span>
+                        <div class="progress-bar-container">
+                            <div class="progress-bar" id="bar-1"></div>
+                        </div>
+                        <span class="confidence-val" id="val-1">0.0%</span>
+                    </div>
+                    <div class="confidence-row" data-digit="2">
+                        <span class="digit-label">2</span>
+                        <div class="progress-bar-container">
+                            <div class="progress-bar" id="bar-2"></div>
+                        </div>
+                        <span class="confidence-val" id="val-2">0.0%</span>
+                    </div>
+                    <div class="confidence-row" data-digit="3">
+                        <span class="digit-label">3</span>
+                        <div class="progress-bar-container">
+                            <div class="progress-bar" id="bar-3"></div>
+                        </div>
+                        <span class="confidence-val" id="val-3">0.0%</span>
+                    </div>
+                    <div class="confidence-row" data-digit="4">
+                        <span class="digit-label">4</span>
+                        <div class="progress-bar-container">
+                            <div class="progress-bar" id="bar-4"></div>
+                        </div>
+                        <span class="confidence-val" id="val-4">0.0%</span>
+                    </div>
+                    <div class="confidence-row" data-digit="5">
+                        <span class="digit-label">5</span>
+                        <div class="progress-bar-container">
+                            <div class="progress-bar" id="bar-5"></div>
+                        </div>
+                        <span class="confidence-val" id="val-5">0.0%</span>
+                    </div>
+                    <div class="confidence-row" data-digit="6">
+                        <span class="digit-label">6</span>
+                        <div class="progress-bar-container">
+                            <div class="progress-bar" id="bar-6"></div>
+                        </div>
+                        <span class="confidence-val" id="val-6">0.0%</span>
+                    </div>
+                    <div class="confidence-row" data-digit="7">
+                        <span class="digit-label">7</span>
+                        <div class="progress-bar-container">
+                            <div class="progress-bar" id="bar-7"></div>
+                        </div>
+                        <span class="confidence-val" id="val-7">0.0%</span>
+                    </div>
+                    <div class="confidence-row" data-digit="8">
+                        <span class="digit-label">8</span>
+                        <div class="progress-bar-container">
+                            <div class="progress-bar" id="bar-8"></div>
+                        </div>
+                        <span class="confidence-val" id="val-8">0.0%</span>
+                    </div>
+                    <div class="confidence-row" data-digit="9">
+                        <span class="digit-label">9</span>
+                        <div class="progress-bar-container">
+                            <div class="progress-bar" id="bar-9"></div>
+                        </div>
+                        <span class="confidence-val" id="val-9">0.0%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        Developed by Rashmi Anand | Powered by Scikit-Learn SVM with RBF Kernel (MNIST Database)
+    </footer>
+
+    <script>
+        const canvas = document.getElementById('digit-canvas');
+        const ctx = canvas.getContext('2d');
+        const clearBtn = document.getElementById('clear-button');
+        const predictBtn = document.getElementById('predict-button');
+        const predictedValEl = document.getElementById('predicted-value');
+        const resultTitleEl = document.getElementById('result-title');
+        const resultDescEl = document.getElementById('result-desc');
+
+        let isDrawing = false;
+
+        // Initialize Canvas with black background
+        function resetCanvas() {
+            ctx.fillStyle = '#000000';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Brush properties
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = 18; // Thick stroke to match MNIST character thickness
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+        }
+        
+        resetCanvas();
+
+        // Drawing Event Listeners
+        canvas.addEventListener('mousedown', startDrawing);
+        canvas.addEventListener('mousemove', draw);
+        canvas.addEventListener('mouseup', stopDrawing);
+        canvas.addEventListener('mouseleave', stopDrawing);
+        
+        // Touch support for tablets/mobiles
+        canvas.addEventListener('touchstart', (e) => {
+            const touch = e.touches[0];
+            const rect = canvas.getBoundingClientRect();
+            startDrawing({
+                clientX: touch.clientX,
+                clientY: touch.clientY,
+                preventDefault: () => e.preventDefault()
+            });
+        });
+        canvas.addEventListener('touchmove', (e) => {
+            const touch = e.touches[0];
+            draw({
+                clientX: touch.clientX,
+                clientY: touch.clientY,
+                preventDefault: () => e.preventDefault()
+            });
+        });
+        canvas.addEventListener('touchend', stopDrawing);
+
+        function startDrawing(e) {
+            isDrawing = true;
+            if (e.preventDefault) e.preventDefault();
+            const coords = getCoords(e);
+            ctx.beginPath();
+            ctx.moveTo(coords.x, coords.y);
+        }
+
+        function draw(e) {
+            if (!isDrawing) return;
+            if (e.preventDefault) e.preventDefault();
+            const coords = getCoords(e);
+            ctx.lineTo(coords.x, coords.y);
+            ctx.stroke();
+        }
+
+        function stopDrawing() {
+            if (isDrawing) {
+                isDrawing = false;
+                // Auto classify on release for smooth interactive UX
+                classifyDigit();
+            }
+        }
+
+        function getCoords(e) {
+            const rect = canvas.getBoundingClientRect();
+            return {
+                x: e.clientX - rect.left,
+                y: e.clientY - rect.top
+            };
+        }
+
+        // Clear button handler
+        clearBtn.addEventListener('click', () => {
+            resetCanvas();
+            predictedValEl.textContent = '-';
+            resultTitleEl.textContent = 'Awaiting Drawing...';
+            resultDescEl.textContent = "Draw a number 0 to 9 on the left and click 'Grade'. The SVM RBF model will output the most likely classification in real time.";
+            
+            // Reset bars
+            for (let i = 0; i < 10; i++) {
+                const bar = document.getElementById(`bar-${i}`);
+                const val = document.getElementById(`val-${i}`);
+                const row = document.querySelector(`.confidence-row[data-digit="${i}"]`);
+                bar.style.width = '0%';
+                val.textContent = '0.0%';
+                val.classList.remove('active');
+                row.querySelector('.digit-label').classList.remove('active');
+            }
+        });
+
+        predictBtn.addEventListener('click', classifyDigit);
+
+        // API classification handler
+        function classifyDigit() {
+            // 1. Create a 28x28 offscreen canvas to scale down the image
+            const offscreen = document.createElement('canvas');
+            offscreen.width = 28;
+            offscreen.height = 28;
+            const ctx28 = offscreen.getContext('2d');
+            
+            // Draw main canvas to offscreen canvas (scaling from 280x280 to 28x28)
+            ctx28.drawImage(canvas, 0, 0, 280, 280, 0, 0, 28, 28);
+            
+            // Get pixel data
+            const imgData = ctx28.getImageData(0, 0, 28, 28);
+            const data = imgData.data;
+            const pixels = [];
+            
+            // Convert RGBA to single intensity value, normalized between [0.0, 1.0]
+            for (let i = 0; i < data.length; i += 4) {
+                // Take red channel (R=G=B for white/black pixels)
+                const val = data[i];
+                pixels.push(val / 255.0);
+            }
+
+            // Check if canvas is completely empty (no drawing)
+            const sum = pixels.reduce((a, b) => a + b, 0);
+            if (sum === 0) {
+                return; // Nothing to predict
+            }
+
+            // Send to backend python server
+            fetch('/predict', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ pixels: pixels }),
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error("HTTP error " + response.status);
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.error) {
+                    console.error("Backend error:", data.error);
+                    resultTitleEl.textContent = "Inference Error";
+                    resultDescEl.textContent = data.error;
+                    return;
+                }
+                
+                const pred = data.prediction;
+                const probs = data.probabilities;
+                
+                // Show Prediction
+                predictedValEl.textContent = pred;
+                resultTitleEl.textContent = `Graded: Digit ${pred}`;
+                
+                const confidence = (probs[pred] * 100).toFixed(1);
+                resultDescEl.textContent = `The student's handwriting was graded as a '${pred}' with a confidence of ${confidence}%. Check the confidence scores below to view class probability distributions.`;
+                
+                // Update Bars
+                for (let i = 0; i < 10; i++) {
+                    const prob = probs[i];
+                    const bar = document.getElementById(`bar-${i}`);
+                    const val = document.getElementById(`val-${i}`);
+                    const row = document.querySelector(`.confidence-row[data-digit="${i}"]`);
+                    const label = row.querySelector('.digit-label');
+                    
+                    bar.style.width = `${prob * 100}%`;
+                    val.textContent = `${(prob * 100).toFixed(1)}%`;
+                    
+                    if (i === pred) {
+                        val.classList.add('active');
+                        label.classList.add('active');
+                    } else {
+                        val.classList.remove('active');
+                        label.classList.remove('active');
+                    }
+                }
+            })
+            .catch(error => {
+                console.error("Prediction failed:", error);
+                resultTitleEl.textContent = "Prediction Server Offline";
+                resultDescEl.textContent = "Make sure the python API server is running on localhost:8000 by running: python3 src/server.py";
+            });
+        }
+    </script>
+</body>
+</html>
