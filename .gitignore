@@ -1,0 +1,15 @@
+# Ignore compiled models or large binaries
+models/best_svm_model.joblib
+
+# Ignore temporary local presentation resources (untracked from git but kept locally)
+reports/PRESENTATION.md
+reports/presentation.html
+
+# Ignore macOS system files
+.DS_Store
+
+# Ignore python cache
+__pycache__/
+*.py[cod]
+*$py.class
+.ipynb_checkpoints/
