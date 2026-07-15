@@ -7,6 +7,29 @@ from sklearn.preprocessing import MinMaxScaler
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
+def flatten_images(X):
+    """
+    Flattens a batch of 2D image arrays into 1D feature vectors.
+    Converts images of shape (n, 28, 28) into (n, 784) for model input.
+    If already flat (n, 784), returns as-is.
+
+    Parameters:
+    -----------
+    X : numpy.ndarray
+        Image array of shape (n_samples, 28, 28) or already (n_samples, 784).
+
+    Returns:
+    --------
+    X_flat : numpy.ndarray
+        Flattened feature matrix of shape (n_samples, 784).
+    """
+    if X.ndim == 3:
+        n_samples = X.shape[0]
+        logger.info(f"Flattening {n_samples} images from shape {X.shape} to ({n_samples}, 784).")
+        return X.reshape(n_samples, -1)
+    logger.info("Data already flat, skipping reshape.")
+    return X
+
 def scale_pixels_custom(X):
     """
     Normalizes pixel intensity values from [0, 255] down to [0.0, 1.0] using fast custom division.
