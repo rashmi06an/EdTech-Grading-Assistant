@@ -1,4 +1,4 @@
-# 🎓 Automated EdTech Grading Assistant
+#  Automated EdTech Grading Assistant
 
 This repository contains the complete production-grade source code, Jupyter notebooks, interactive web server application, and technical reports for the **Automated EdTech Grading Assistant** (Handwritten Image Classification) project. 
 
@@ -6,7 +6,7 @@ This project implements a classical machine learning pipeline using **Support Ve
 
 ---
 
-## 📊 Key Project Benchmarks
+## Key Project Benchmarks
 
 Through rigorous hyperparameter grid sweeps and model comparisons, the following performance metrics were established:
 
@@ -21,7 +21,7 @@ Through rigorous hyperparameter grid sweeps and model comparisons, the following
 
 ---
 
-## 📁 Repository Structure
+##  Repository Structure
 
 ```
 EdTech-Grading-Assistant/
@@ -54,7 +54,7 @@ EdTech-Grading-Assistant/
 
 ---
 
-## 🛠️ Quick Start & Usage
+##  Quick Start & Usage
 
 Ensure you have Python 3.10+ installed.
 
@@ -99,7 +99,7 @@ Open your web browser and navigate to: **[http://localhost:8000](http://localhos
 
 ---
 
-## 🧠 Core Preprocessing & Math Concepts
+##  Core Preprocessing & Math Concepts
 
 ### Pixel Normalization
 Raw pixel intensities are stored as 8-bit integers ranging from `0` (white background) to `255` (black ink). High input values cause distance calculation saturation in SVM kernels. We scale the features down to `[0.0, 1.0]` using:
